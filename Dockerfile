@@ -1,11 +1,15 @@
 # Use uma imagem base com Python
 FROM python:3.12-slim
 
-# Instalar dependências do sistema, Chrome e utilitários necessários
+# Configurar variáveis de ambiente
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Instalar dependências do sistema
 RUN apt-get update && apt-get install -y \
     wget \
     curl \
-    gnupg \
+    gnupg2 \
     unzip \
     ca-certificates \
     fonts-liberation \
@@ -26,20 +30,22 @@ RUN apt-get update && apt-get install -y \
     libxkbcommon0 \
     libxrandr2 \
     xdg-utils \
-    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list \
+    && rm -rf /var/lib/apt/lists/*
+
+# Instalar Chrome
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update \
     && apt-get install -y google-chrome-stable \
-    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Instalar ChromeDriver
-RUN CHROME_VERSION=$(google-chrome --version | grep -oE "[0-9]+\.[0-9]+\.[0-9]+") \
-    && CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION%%.*}") \
-    && wget -q "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip" \
-    && unzip chromedriver_linux64.zip -d /usr/local/bin \
-    && rm chromedriver_linux64.zip \
-    && chmod +x /usr/local/bin/chromedriver
+RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d. -f1) \
+    && wget -q https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/119.0.6045.105/linux64/chromedriver-linux64.zip \
+    && unzip chromedriver-linux64.zip \
+    && mv chromedriver-linux64/chromedriver /usr/local/bin/ \
+    && chmod +x /usr/local/bin/chromedriver \
+    && rm -rf chromedriver-linux64*
 
 # Configurar diretório de trabalho
 WORKDIR /app
@@ -48,19 +54,18 @@ WORKDIR /app
 COPY requirements.txt .
 COPY main.py .
 
-# Criar diretório para downloads
-RUN mkdir downloads && chmod 777 downloads
+# Criar diretório para downloads e dar permissões
+RUN mkdir -p downloads && chmod 777 downloads
 
 # Instalar dependências Python
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Configurar variáveis de ambiente
-ENV PYTHONUNBUFFERED=1
-ENV CHROME_BIN=/usr/bin/google-chrome
-ENV CHROME_PATH=/usr/bin/google-chrome
-
 # Expor porta
 EXPOSE 5000
+
+# Configurar variáveis de ambiente para o Chrome
+ENV CHROME_BIN=/usr/bin/google-chrome
+ENV CHROME_PATH=/usr/bin/google-chrome
 
 # Comando para executar a aplicação
 CMD ["python", "main.py"]
