@@ -1,11 +1,31 @@
 # Use uma imagem base com Python
 FROM python:3.12-slim
 
-# Instalar dependências do Chrome e Chrome
+# Instalar dependências do sistema, Chrome e utilitários necessários
 RUN apt-get update && apt-get install -y \
     wget \
+    curl \
     gnupg \
     unzip \
+    ca-certificates \
+    fonts-liberation \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libatspi2.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libdrm2 \
+    libgbm1 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxkbcommon0 \
+    libxrandr2 \
+    xdg-utils \
     && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
     && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list \
     && apt-get update \
@@ -29,7 +49,7 @@ COPY requirements.txt .
 COPY main.py .
 
 # Criar diretório para downloads
-RUN mkdir downloads
+RUN mkdir downloads && chmod 777 downloads
 
 # Instalar dependências Python
 RUN pip install --no-cache-dir -r requirements.txt
