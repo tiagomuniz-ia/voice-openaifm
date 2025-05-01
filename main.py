@@ -6,7 +6,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 import time
 import os
 import io
@@ -48,14 +47,11 @@ def setup_driver():
         "safebrowsing.enabled": True
     })
     
-    logging.info("Instalando e configurando o ChromeDriver...")
-    
-    # Configuração específica para Docker
-    if os.environ.get('CHROME_PATH'):
-        chrome_options.binary_location = os.environ.get('CHROME_PATH')
+    logging.info("Configurando o ChromeDriver...")
     
     try:
-        service = Service(ChromeDriverManager().install())
+        # Usar o ChromeDriver instalado manualmente
+        service = Service(executable_path='/usr/local/bin/chromedriver')
         driver = webdriver.Chrome(service=service, options=chrome_options)
         return driver, DOWNLOAD_DIR
     except Exception as e:
