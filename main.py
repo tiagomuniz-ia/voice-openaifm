@@ -101,13 +101,13 @@ def generate_audio(text_to_narrate, tone_configuration=None):
         
         # Selecionar a voz padrão
         logging.info("Selecionando a voz...")
-        voice_selector = "body > div > main > div.flex.flex-row > div > div.flex.flex-1.flex-col.pt-3.rounded-md > div > div:nth-child(2) > div"
+        voice_selector = "body > div > main > div.flex.flex-row > div > div.flex.flex-1.flex-col.pt-3.rounded-md > div > div:nth-child(4) > div"
         wait_and_click(driver, By.CSS_SELECTOR, voice_selector)
         
         # Inserir a tonalidade de voz (se fornecida)
         if tone_configuration:
             logging.info("Configurando a tonalidade de voz...")
-            tone_xpath = "/html/body/div/main/div[2]/div[1]/div[2]/div/textarea"
+            tone_xpath = "//*[@id="input"]"
             wait_and_type(driver, By.XPATH, tone_xpath, tone_configuration)
         else:
             # Tonalidade padrão
@@ -127,7 +127,7 @@ Pauses: Pausas leves e respiradas entre frases. Use o silêncio como espaço"""
         
         # Inserir o texto para narração
         logging.info("Inserindo texto para narração...")
-        text_xpath = "/html/body/div/main/div[2]/div[2]/div[2]/div/textarea"
+        text_xpath = "//*[@id="prompt"]"
         wait_and_type(driver, By.XPATH, text_xpath, text_to_narrate)
         
         # Iniciar download do áudio
