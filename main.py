@@ -99,50 +99,33 @@ def generate_audio(text_to_narrate, tone_configuration=None):
         
         time.sleep(5)
         
-        # Selecionar a voz padrão
+        # Novo seletor de voz
         logging.info("Selecionando a voz...")
         voice_selector = "body > div > main > div.flex.flex-row > div > div.flex.flex-1.flex-col.pt-3.rounded-md > div > div:nth-child(4) > div"
         wait_and_click(driver, By.CSS_SELECTOR, voice_selector)
         
-        # Inserir a tonalidade de voz (se fornecida)
+        # Novo campo de tonalidade
+        tone_xpath = '//*[@id="input"]'
         if tone_configuration:
             logging.info("Configurando a tonalidade de voz...")
-            tone_xpath = "//*[@id="input"]"
             wait_and_type(driver, By.XPATH, tone_xpath, tone_configuration)
         else:
-            # Tonalidade padrão
-            default_tone = """Voice Affect: Mansa, suave como um sussurro à alma — sem ser abafada, sem soar cansada. Uma voz que acalma com leveza, como quem toca com os dedos o coração de quem ouve.
-
-Tone: Amoroso, espiritual e acolhedor. Como quem lê a Palavra com intimidade, fé e ternura. Uma fala que não domina o espaço, mas o preenche com suavidade e calor humano.
-
-Pacing: Calmo, porém contínuo. Sem pressa, mas com fluidez leve — como quem caminha devagar, mas constante. A voz não é arrastada, e sim presente, suave, respirada e natural.
-
-Emotion: Fé tranquila, compaixão genuína, presença sensível. Fale como quem cuida de alguém em silêncio, com palavras que acolhem sem invadir. Emoção contida, mas real — como uma oração sincera.
-
-Pronunciation: Clara, arredondada, sem cortes bruscos. Cada palavra deve ser dita com carinho e intenção. Dê leve ênfase emocional em palavras como "graça", "descanso", "esperança", "amor", "Senhor".
-
-Pauses: Pausas leves e respiradas entre frases. Use o silêncio como espaço"""
-            tone_xpath = "/html/body/div/main/div[2]/div[1]/div[2]/div/textarea"
+            default_tone = """Voice Affect: Mansa, suave ..."""  # (restante do seu texto padrão)
             wait_and_type(driver, By.XPATH, tone_xpath, default_tone)
         
-        # Inserir o texto para narração
+        # Novo campo de texto da narração
         logging.info("Inserindo texto para narração...")
-        text_xpath = "//*[@id="prompt"]"
+        text_xpath = '//*[@id="prompt"]'
         wait_and_type(driver, By.XPATH, text_xpath, text_to_narrate)
         
-        # Iniciar download do áudio
+        # Download do áudio (sem alterações)
         logging.info("Fazendo download do áudio...")
         download_selector = "body > div > footer > div > div > div:nth-child(1)"
         wait_and_click(driver, By.CSS_SELECTOR, download_selector)
         
-        # Aguardar e obter o arquivo de áudio
         audio_file_path = wait_for_download(download_dir)
-        
-        # Ler o arquivo de áudio em bytes
         with open(audio_file_path, 'rb') as audio_file:
             audio_bytes = audio_file.read()
-        
-        # Limpar o arquivo baixado imediatamente
         try:
             os.remove(audio_file_path)
             logging.info(f"Arquivo temporário removido: {audio_file_path}")
@@ -157,6 +140,7 @@ Pauses: Pausas leves e respiradas entre frases. Use o silêncio como espaço"""
     finally:
         if driver:
             driver.quit()
+
 
 @app.route('/generate-audio', methods=['POST'])
 def generate_audio_endpoint():
